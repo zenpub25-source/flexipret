@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlexiPrêt — Votre crédit, votre rythme</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:#0D1B2A;--blue:#1E6FD9;--blue-light:#3D8EF0;--mint:#00C9A7;--mint-dim:#00a88b;
+    --white:#F8FAFF;--gray:#E8EDF5;--gray-mid:#8A9BB0;--text:#1A2B40;--card-bg:#ffffff;
+    --shadow:0 4px 24px rgba(13,27,42,.10);--shadow-lg:0 12px 48px rgba(13,27,42,.16);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',sans-serif;background:var(--white);color:var(--text);overflow-x:hidden}
+  h1,h2,h3,h4{font-family:'Sora',sans-serif}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5%;height:68px;background:rgba(13,27,42,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07)}
+  .nav-logo{font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:800;color:#fff;text-decoration:none;letter-spacing:-.5px}
+  .nav-logo span{color:var(--mint)}
+  .nav-links{display:flex;gap:2rem;list-style:none}
+  .nav-links a{color:rgba(255,255,255,.75);text-decoration:none;font-size:.9rem;font-weight:500;transition:color .2s}
+  .nav-links a:hover{color:#fff}
+  .nav-cta{background:var(--mint);color:var(--navy);padding:.55rem 1.4rem;border-radius:50px;font-weight:700;font-size:.88rem;text-decoration:none;transition:background .2s,transform .15s}
+  .nav-cta:hover{background:#00dbb8;transform:translateY(-1px)}
+
+  /* API STATUS */
+  .api-status{display:flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;padding:.3rem .8rem;border-radius:50px;margin-right:.5rem}
+  .api-status.online{background:rgba(0,201,167,.15);color:var(--mint)}
+  .api-status.offline{background:rgba(220,50,50,.15);color:#e74c3c}
+  .api-status::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor}
+
+  /* HERO */
+  .hero{min-height:100vh;display:flex;align-items:center;background:linear-gradient(135deg,var(--navy) 0%,#1a2e4a 60%,#0f3060 100%);padding:100px 5% 60px;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 50%,rgba(30,111,217,.18) 0%,transparent 70%)}
+  .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;max-width:1200px;margin:0 auto;width:100%;position:relative;z-index:1}
+  .hero-tag{display:inline-block;background:rgba(0,201,167,.15);color:var(--mint);border:1px solid rgba(0,201,167,.3);border-radius:50px;padding:.3rem 1rem;font-size:.8rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1.5rem}
+  .hero h1{font-size:clamp(2.2rem,4vw,3.4rem);font-weight:800;color:#fff;line-height:1.15;margin-bottom:1.2rem;letter-spacing:-1px}
+  .hero h1 em{font-style:normal;color:var(--mint)}
+  .hero p{color:rgba(255,255,255,.7);font-size:1.05rem;line-height:1.7;margin-bottom:2rem}
+  .hero-stats{display:flex;gap:2.5rem;margin-top:2.5rem}
+  .hero-stat .num{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;color:#fff}
+  .hero-stat .lbl{font-size:.78rem;color:rgba(255,255,255,.5);font-weight:500;margin-top:.1rem}
+
+  /* SIMULATOR */
+  .simulator-card{background:#fff;border-radius:20px;padding:2rem 2.2rem;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .simulator-card h3{font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:1.5rem}
+  .sim-row{margin-bottom:1.4rem}
+  .sim-row label{display:flex;justify-content:space-between;font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:.5rem}
+  .sim-row label span{color:var(--blue);font-size:1rem}
+  input[type="range"]{width:100%;-webkit-appearance:none;height:5px;border-radius:5px;background:var(--gray);outline:none}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--blue);cursor:pointer;box-shadow:0 2px 6px rgba(30,111,217,.4)}
+  .sim-result{background:linear-gradient(135deg,var(--navy),#1a3a60);border-radius:14px;padding:1.2rem 1.5rem;margin-top:1.5rem}
+  .sim-result-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem}
+  .sim-result-row:last-child{margin-bottom:0}
+  .sim-result-row .key{font-size:.8rem;color:rgba(255,255,255,.6)}
+  .sim-result-row .val{font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;color:#fff}
+  .sim-result-row .val.big{font-size:1.5rem;color:var(--mint)}
+  .btn-primary{display:block;width:100%;background:var(--mint);color:var(--navy);border:none;padding:.9rem;border-radius:12px;font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-top:1rem;transition:background .2s,transform .15s}
+  .btn-primary:hover{background:#00dbb8;transform:translateY(-2px)}
+  .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+  /* SECTIONS */
+  section{padding:90px 5%}
+  .section-tag{display:inline-block;background:rgba(30,111,217,.1);color:var(--blue);border-radius:50px;padding:.3rem 1rem;font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem}
+  .section-title{font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;color:var(--navy);letter-spacing:-.5px;line-height:1.2;margin-bottom:1rem}
+  .section-sub{color:var(--gray-mid);font-size:1rem;line-height:1.7;max-width:540px}
+  .section-header{margin-bottom:3.5rem}
+
+  /* FEATURES */
+  .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1100px;margin:0 auto}
+  .feat-card{background:var(--card-bg);border-radius:18px;padding:2rem;border:1px solid var(--gray);transition:box-shadow .2s,transform .2s}
+  .feat-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px)}
+  .feat-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1.2rem}
+  .feat-icon.blue{background:rgba(30,111,217,.1)}
+  .feat-icon.mint{background:rgba(0,201,167,.1)}
+  .feat-icon.gold{background:rgba(255,186,8,.1)}
+  .feat-card h4{font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:.6rem}
+  .feat-card p{font-size:.88rem;color:var(--gray-mid);line-height:1.65}
+
+  /* HOW IT WORKS */
+  .hiw{background:#f0f5ff}
+  .hiw-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;max-width:1100px;margin:0 auto;position:relative}
+  .hiw-steps::before{content:'';position:absolute;top:28px;left:12%;right:12%;height:2px;background:linear-gradient(90deg,var(--blue),var(--mint));z-index:0}
+  .hiw-step{text-align:center;position:relative;z-index:1}
+  .hiw-step-num{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-light));color:#fff;font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;box-shadow:0 4px 16px rgba(30,111,217,.3)}
+  .hiw-step h4{font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:.4rem}
+  .hiw-step p{font-size:.82rem;color:var(--gray-mid);line-height:1.6}
+
+  /* TAUX */
+  .rates{background:var(--white)}
+  .rates-container{max-width:900px;margin:0 auto}
+  .rates-table{width:100%;border-collapse:collapse;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .rates-table thead{background:var(--navy)}
+  .rates-table th{padding:1rem 1.5rem;text-align:left;color:rgba(255,255,255,.8);font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .rates-table td{padding:1rem 1.5rem;border-bottom:1px solid var(--gray);font-size:.9rem}
+  .rates-table tr:last-child td{border-bottom:none}
+  .rates-table tr:nth-child(even) td{background:#f8faff}
+  .rate-badge{display:inline-block;background:rgba(0,201,167,.12);color:var(--mint-dim);border-radius:50px;padding:.2rem .7rem;font-size:.8rem;font-weight:700}
+
+  /* FORM */
+  .apply{background:linear-gradient(135deg,var(--navy) 0%,#1a3a60 100%)}
+  .apply .section-title{color:#fff}
+  .apply .section-sub{color:rgba(255,255,255,.6)}
+  .apply-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;max-width:1000px;margin:0 auto}
+  .form-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:2.5rem}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+  .form-group{display:flex;flex-direction:column;gap:.4rem}
+  .form-group label{font-size:.82rem;font-weight:600;color:rgba(255,255,255,.7)}
+  .form-group input,.form-group select{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:.75rem 1rem;color:#fff;font-size:.9rem;outline:none;transition:border-color .2s;font-family:'Inter',sans-serif}
+  .form-group input::placeholder{color:rgba(255,255,255,.3)}
+  .form-group input:focus,.form-group select:focus{border-color:var(--mint)}
+  .form-group select option{background:var(--navy);color:#fff}
+  .form-full{grid-column:1/-1}
+  .apply-info{display:flex;flex-direction:column;justify-content:center;gap:1.5rem}
+  .apply-info-item{display:flex;gap:1rem;align-items:flex-start}
+  .apply-info-icon{width:44px;height:44px;min-width:44px;border-radius:12px;background:rgba(0,201,167,.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+  .apply-info-text h4{color:#fff;font-size:.95rem;font-weight:700;margin-bottom:.25rem}
+  .apply-info-text p{color:rgba(255,255,255,.55);font-size:.83rem;line-height:1.6}
+
+  /* DASHBOARD */
+  .dashboard{background:#f0f5ff}
+  .db-tabs{display:flex;gap:.5rem;margin-bottom:2rem;flex-wrap:wrap}
+  .db-tab{background:#fff;border:1.5px solid var(--gray);color:var(--gray-mid);border-radius:50px;padding:.5rem 1.3rem;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+  .db-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .db-panel{display:none}
+  .db-panel.active{display:block}
+  .db-table-wrapper{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);overflow-x:auto}
+  table.db-table{width:100%;border-collapse:collapse;font-size:.85rem}
+  table.db-table th{background:var(--navy);color:rgba(255,255,255,.8);padding:.85rem 1.2rem;text-align:left;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600;white-space:nowrap}
+  table.db-table td{padding:.85rem 1.2rem;border-bottom:1px solid var(--gray);color:var(--text);vertical-align:middle}
+  table.db-table tr:last-child td{border-bottom:none}
+  table.db-table tr:hover td{background:#f8faff}
+  .status-badge{display:inline-flex;align-items:center;gap:.3rem;border-radius:50px;padding:.22rem .7rem;font-size:.75rem;font-weight:700}
+  .status-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+  .status-en-cours{background:rgba(255,186,8,.12);color:#d4900a}
+  .status-approuve{background:rgba(0,201,167,.12);color:var(--mint-dim)}
+  .status-refuse{background:rgba(220,50,50,.1);color:#c0392b}
+  .status-rembourse{background:rgba(30,111,217,.1);color:var(--blue)}
+  .db-empty{text-align:center;padding:3rem;color:var(--gray-mid);font-size:.9rem}
+  .db-actions{display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:1rem;align-items:center;flex-wrap:wrap}
+  .btn-sm{padding:.4rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+  .btn-danger{background:rgba(220,50,50,.1);color:#c0392b}
+  .btn-danger:hover{background:rgba(220,50,50,.2)}
+  .btn-export{background:rgba(0,201,167,.1);color:var(--mint-dim)}
+  .btn-export:hover{background:rgba(0,201,167,.2)}
+  .btn-reload{background:rgba(30,111,217,.1);color:var(--blue)}
+  .btn-reload:hover{background:rgba(30,111,217,.2)}
+
+  /* STATS CARDS */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.5rem;margin-bottom:2rem}
+  .stat-card{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:var(--shadow)}
+  .stat-card .label{font-size:.75rem;color:var(--gray-mid);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+  .stat-card .value{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;color:var(--navy)}
+  .stat-card .value.blue{color:var(--blue)}
+  .stat-card .value.mint{color:var(--mint)}
+
+  /* SPINNER */
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:.4rem}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--navy);color:#fff;padding:1rem 1.5rem;border-radius:12px;font-size:.88rem;font-weight:500;box-shadow:var(--shadow-lg);transform:translateY(100px);opacity:0;transition:all .3s;z-index:999;display:flex;align-items:center;gap:.6rem;max-width:320px}
+  .toast.show{transform:translateY(0);opacity:1}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
+  .modal-overlay.open{display:flex}
+  .modal{background:#fff;border-radius:20px;padding:2.5rem;max-width:500px;width:100%;position:relative;max-height:90vh;overflow-y:auto}
+  .modal h3{font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:.4rem}
+  .modal p.sub{color:var(--gray-mid);font-size:.88rem;margin-bottom:1.5rem}
+  .modal-close{position:absolute;top:1.2rem;right:1.2rem;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--gray-mid)}
+  .modal-detail{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.5rem}
+  .modal-field{background:#f8faff;border-radius:10px;padding:.8rem 1rem}
+  .modal-field .key{font-size:.72rem;color:var(--gray-mid);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .modal-field .val{font-family:'Sora',sans-serif;font-size:.95rem;font-weight:700;color:var(--navy);margin-top:.2rem;word-break:break-all}
+  .modal-note{margin-bottom:1rem}
+  .modal-note label{font-size:.82rem;font-weight:600;color:var(--text);display:block;margin-bottom:.4rem}
+  .modal-note textarea{width:100%;border:1.5px solid var(--gray);border-radius:10px;padding:.7rem 1rem;font-family:'Inter',sans-serif;font-size:.88rem;resize:vertical;outline:none;transition:border-color .2s}
+  .modal-note textarea:focus{border-color:var(--mint)}
+  .modal-actions{display:flex;gap:.8rem}
+  .btn-approve{flex:1;background:var(--mint);color:var(--navy);border:none;padding:.75rem;border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;transition:background .2s}
+  .btn-approve:hover{background:#00dbb8}
+  .btn-reject{flex:1;background:rgba(220,50,50,.1);color:#c0392b;border:none;padding:.75rem;border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;transition:background .2s}
+  .btn-reject:hover{background:rgba(220,50,50,.2)}
+  .btn-delete{background:rgba(220,50,50,.08);color:#c0392b;border:none;padding:.75rem 1rem;border-radius:10px;font-weight:700;font-size:.88rem;cursor:pointer;transition:background .2s}
+  .btn-delete:hover{background:rgba(220,50,50,.18)}
+
+  /* HISTORIQUE */
+  .hist-item{display:flex;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--gray);font-size:.85rem}
+  .hist-item:last-child{border-bottom:none}
+  .hist-date{color:var(--gray-mid);white-space:nowrap;font-size:.78rem;min-width:120px}
+  .hist-text strong{color:var(--navy)}
+
+  /* OFFLINE BANNER */
+  .offline-banner{background:#fff3cd;border:1px solid #ffc107;color:#856404;padding:.8rem 1.5rem;border-radius:10px;margin-bottom:1.5rem;font-size:.88rem;display:none}
+  .offline-banner.show{display:block}
+
+  /* FOOTER */
+  footer{background:var(--navy);color:rgba(255,255,255,.5);padding:3rem 5% 2rem}
+  .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;max-width:1100px;margin:0 auto 2rem}
+  .footer-brand .nav-logo{display:inline-block;margin-bottom:1rem}
+  .footer-brand p{font-size:.85rem;line-height:1.7;color:rgba(255,255,255,.45)}
+  .footer-col h5{color:rgba(255,255,255,.8);font-size:.85rem;font-weight:700;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.05em}
+  .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+  .footer-col a{color:rgba(255,255,255,.45);text-decoration:none;font-size:.85rem;transition:color .2s}
+  .footer-col a:hover{color:rgba(255,255,255,.8)}
+  .footer-bottom{max-width:1100px;margin:0 auto;border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem;display:flex;justify-content:space-between;font-size:.8rem}
+
+  /* RESPONSIVE */
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr}.features-grid{grid-template-columns:1fr 1fr}.hiw-steps{grid-template-columns:1fr 1fr}.hiw-steps::before{display:none}.apply-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:620px){.nav-links{display:none}.features-grid{grid-template-columns:1fr}.hiw-steps{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr}.hero-stats{gap:1.5rem}.modal-detail{grid-template-columns:1fr}.modal-actions{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Flexi<span>Prêt</span></a>
+  <ul class="nav-links">
+    <li><a href="#fonctionnalites">Avantages</a></li>
+    <li><a href="#comment-ca-marche">Comment ça marche</a></li>
+    <li><a href="#taux">Nos taux</a></li>
+    <li><a href="#base-de-donnees">Dashboard</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:.5rem">
+    <div class="api-status offline" id="api-indicator">API hors ligne</div>
+    <a href="#demande" class="nav-cta">Faire une demande</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-tag">✦ 100% en ligne · Réponse en 24h</div>
+      <h1>Votre crédit,<br>à votre <em>rythme</em></h1>
+      <p>FlexiPrêt finance vos projets jusqu'à 75 000 € avec des mensualités adaptées à votre budget. Simple, transparent, sans mauvaises surprises.</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="num">48h</div><div class="lbl">Délai de réponse</div></div>
+        <div class="hero-stat"><div class="num">3,9%</div><div class="lbl">TAEG dès</div></div>
+        <div class="hero-stat"><div class="num" id="hero-count">—</div><div class="lbl">Demandes traitées</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="simulator-card">
+        <h3>🧮 Simulez votre prêt</h3>
+        <div class="sim-row">
+          <label>Montant emprunté <span id="val-montant">10 000 €</span></label>
+          <input type="range" id="slider-montant" min="500" max="75000" step="500" value="10000" oninput="updateSim()">
+        </div>
+        <div class="sim-row">
+          <label>Durée <span id="val-duree">36 mois</span></label>
+          <input type="range" id="slider-duree" min="6" max="84" step="6" value="36" oninput="updateSim()">
+        </div>
+        <div class="sim-row">
+          <label>Taux TAEG <span id="val-taux">4,5%</span></label>
+          <input type="range" id="slider-taux" min="1.9" max="21.9" step="0.1" value="4.5" oninput="updateSim()">
+        </div>
+        <div class="sim-result">
+          <div class="sim-result-row"><span class="key">Mensualité estimée</span><span class="val big" id="sim-mensualite">297,47 €</span></div>
+          <div class="sim-result-row"><span class="key">Coût total du crédit</span><span class="val" id="sim-cout">708,88 €</span></div>
+          <div class="sim-result-row"><span class="key">Montant total dû</span><span class="val" id="sim-total">10 708,88 €</span></div>
+        </div>
+        <button class="btn-primary" onclick="scrollToDemande()">Faire ma demande →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="fonctionnalites" style="background:var(--white)">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-header">
+      <div class="section-tag">Pourquoi FlexiPrêt</div>
+      <h2 class="section-title">Conçu pour vous faciliter la vie</h2>
+      <p class="section-sub">Toutes les fonctionnalités dont vous avez besoin pour obtenir un crédit sans stress.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card"><div class="feat-icon blue">⚡</div><h4>Réponse immédiate</h4><p>Notre algorithme analyse votre dossier en temps réel. Obtenez une décision de principe en moins de 2 minutes.</p></div>
+      <div class="feat-card"><div class="feat-icon mint">🔒</div><h4>100% sécurisé</h4><p>Vos données sont chiffrées et protégées selon les normes RGPD. Nous ne revendons jamais vos informations.</p></div>
+      <div class="feat-card"><div class="feat-icon gold">📊</div><h4>Taux compétitifs</h4><p>Bénéficiez de taux parmi les plus bas du marché, à partir de 3,9% TAEG. Transparence garantie sur tous les frais.</p></div>
+      <div class="feat-card"><div class="feat-icon mint">🗓️</div><h4>Flexibilité totale</h4><p>Remboursez par anticipation sans pénalité, modulez vos mensualités et reportez une échéance si nécessaire.</p></div>
+      <div class="feat-card"><div class="feat-icon blue">📱</div><h4>Tout en ligne</h4><p>De la simulation à la signature électronique, gérez votre crédit depuis votre smartphone ou ordinateur.</p></div>
+      <div class="feat-card"><div class="feat-icon gold">🤝</div><h4>Support dédié</h4><p>Un conseiller personnel disponible 7j/7 par chat, email ou téléphone pour répondre à toutes vos questions.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="hiw" id="comment-ca-marche">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-header" style="text-align:center">
+      <div class="section-tag">Processus</div>
+      <h2 class="section-title">Obtenez votre prêt en 4 étapes</h2>
+      <p class="section-sub" style="margin:0 auto">Simple, rapide et entièrement dématérialisé.</p>
+    </div>
+    <div class="hiw-steps">
+      <div class="hiw-step"><div class="hiw-step-num">1</div><h4>Simulez</h4><p>Utilisez notre simulateur pour estimer vos mensualités et le coût total de votre crédit.</p></div>
+      <div class="hiw-step"><div class="hiw-step-num">2</div><h4>Déposez votre dossier</h4><p>Remplissez le formulaire en ligne en 5 minutes. Téléchargez vos justificatifs de façon sécurisée.</p></div>
+      <div class="hiw-step"><div class="hiw-step-num">3</div><h4>Obtenez une décision</h4><p>Notre équipe analyse votre dossier et vous répond sous 24h avec une offre personnalisée.</p></div>
+      <div class="hiw-step"><div class="hiw-step-num">4</div><h4>Recevez vos fonds</h4><p>Signez électroniquement et recevez les fonds sur votre compte bancaire sous 48h.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TAUX -->
+<section class="rates" id="taux">
+  <div class="rates-container">
+    <div class="section-header">
+      <div class="section-tag">Grille tarifaire</div>
+      <h2 class="section-title">Nos taux en toute transparence</h2>
+      <p class="section-sub">Des taux fixes, sans frais cachés.</p>
+    </div>
+    <table class="rates-table">
+      <thead><tr><th>Type de prêt</th><th>Montant</th><th>Durée</th><th>TAEG</th><th>Mensualité exemple</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Prêt personnel</strong></td><td>1 000 – 5 000 €</td><td>12 – 36 mois</td><td><span class="rate-badge">3,9%</span></td><td>À partir de 86 €/mois</td></tr>
+        <tr><td><strong>Prêt confort</strong></td><td>5 000 – 20 000 €</td><td>24 – 60 mois</td><td><span class="rate-badge">5,2%</span></td><td>À partir de 188 €/mois</td></tr>
+        <tr><td><strong>Prêt projet</strong></td><td>20 000 – 50 000 €</td><td>36 – 84 mois</td><td><span class="rate-badge">6,8%</span></td><td>À partir de 441 €/mois</td></tr>
+        <tr><td><strong>Crédit auto</strong></td><td>5 000 – 40 000 €</td><td>12 – 72 mois</td><td><span class="rate-badge">4,5%</span></td><td>À partir de 215 €/mois</td></tr>
+        <tr><td><strong>Prêt travaux</strong></td><td>3 000 – 75 000 €</td><td>24 – 84 mois</td><td><span class="rate-badge">5,9%</span></td><td>À partir de 112 €/mois</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:1rem;font-size:.78rem;color:var(--gray-mid)">* Exemple représentatif. Le taux définitif dépend de votre profil. Crédit soumis à acceptation.</p>
+  </div>
+</section>
+
+<!-- DEMANDE -->
+<section class="apply" id="demande">
+  <div style="max-width:1000px;margin:0 auto">
+    <div class="section-header">
+      <div class="section-tag" style="background:rgba(0,201,167,.15);color:var(--mint)">Demande en ligne</div>
+      <h2 class="section-title">Faites votre demande maintenant</h2>
+      <p class="section-sub">Votre demande est enregistrée directement dans notre base de données SQLite via l'API Flask.</p>
+    </div>
+    <div class="apply-grid">
+      <div class="form-card">
+        <div class="form-row">
+          <div class="form-group"><label>Prénom *</label><input type="text" id="f-prenom" placeholder="Marie"></div>
+          <div class="form-group"><label>Nom *</label><input type="text" id="f-nom" placeholder="Dupont"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Email *</label><input type="email" id="f-email" placeholder="marie@email.com"></div>
+          <div class="form-group"><label>Téléphone</label><input type="tel" id="f-tel" placeholder="06 12 34 56 78"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Montant souhaité (€) *</label><input type="number" id="f-montant" placeholder="10000" min="500" max="75000"></div>
+          <div class="form-group"><label>Durée (mois) *</label>
+            <select id="f-duree"><option value="">Choisir</option><option value="12">12 mois</option><option value="24">24 mois</option><option value="36">36 mois</option><option value="48">48 mois</option><option value="60">60 mois</option><option value="72">72 mois</option><option value="84">84 mois</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Type de prêt *</label>
+            <select id="f-type"><option value="">Choisir</option><option>Prêt personnel</option><option>Prêt confort</option><option>Prêt projet</option><option>Crédit auto</option><option>Prêt travaux</option></select>
+          </div>
+          <div class="form-group"><label>Revenus mensuels nets (€)</label><input type="number" id="f-revenus" placeholder="2500"></div>
+        </div>
+        <div class="form-row form-full" style="grid-template-columns:1fr">
+          <div class="form-group"><label>Situation professionnelle</label>
+            <select id="f-situation"><option value="">Choisir</option><option>CDI</option><option>CDD</option><option>Indépendant / Freelance</option><option>Fonctionnaire</option><option>Retraité</option><option>Étudiant</option><option>Sans emploi</option></select>
+          </div>
+        </div>
+        <button class="btn-primary" id="btn-submit" onclick="submitDemande()">Envoyer ma demande →</button>
+      </div>
+      <div class="apply-info">
+        <div class="apply-info-item"><div class="apply-info-icon">✅</div><div class="apply-info-text"><h4>Réponse sous 24h</h4><p>Notre équipe analyse votre dossier et vous contacte rapidement avec une offre personnalisée.</p></div></div>
+        <div class="apply-info-item"><div class="apply-info-icon">🔐</div><div class="apply-info-text"><h4>Données protégées</h4><p>Vos informations sont stockées dans une base SQLite sécurisée côté serveur, conformément au RGPD.</p></div></div>
+        <div class="apply-info-item"><div class="apply-info-icon">🗄️</div><div class="apply-info-text"><h4>Base de données réelle</h4><p>API Flask + SQLite. Chaque demande est persistante côté serveur avec historique complet des actions.</p></div></div>
+        <div class="apply-info-item"><div class="apply-info-icon">📄</div><div class="apply-info-text"><h4>Sans engagement</h4><p>Cette demande ne constitue pas un contrat. Vous recevrez une offre que vous êtes libre d'accepter ou refuser.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<section class="dashboard" id="base-de-donnees">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-header">
+      <div class="section-tag">Back-office · API Flask + SQLite</div>
+      <h2 class="section-title">Base de données — Dashboard</h2>
+      <p class="section-sub">Toutes les demandes sont stockées dans <code style="background:#e8edf5;padding:2px 6px;border-radius:4px;font-size:.85em">flexipret.db</code> via l'API Flask sur localhost:5000.</p>
+    </div>
+
+    <div class="offline-banner" id="offline-banner">
+      ⚠️ <strong>API hors ligne.</strong> Lancez le serveur Flask avec <code>python3 app.py</code> dans le dossier du projet, puis <a href="#" onclick="checkAPI();return false">réessayez</a>.
+    </div>
+
+    <div class="db-tabs">
+      <button class="db-tab active" onclick="showTab('demandes')">📋 Toutes (<span id="count-demandes">—</span>)</button>
+      <button class="db-tab" onclick="showTab('approuves')">✅ Approuvées (<span id="count-approuves">—</span>)</button>
+      <button class="db-tab" onclick="showTab('refuses')">❌ Refusées (<span id="count-refuses">—</span>)</button>
+      <button class="db-tab" onclick="showTab('historique')">📜 Historique</button>
+      <button class="db-tab" onclick="showTab('stats')">📊 Statistiques</button>
+    </div>
+
+    <!-- Toutes les demandes -->
+    <div id="panel-demandes" class="db-panel active">
+      <div class="db-actions">
+        <button class="btn-sm btn-reload" onclick="loadDemandes()">🔄 Actualiser</button>
+        <button class="btn-sm btn-export" onclick="exportCSV()">⬇ Exporter CSV</button>
+      </div>
+      <div class="db-table-wrapper">
+        <table class="db-table">
+          <thead><tr><th>#</th><th>Nom complet</th><th>Email</th><th>Montant</th><th>Durée</th><th>Type</th><th>Revenus</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="tbody-demandes"><tr><td colspan="10" class="db-empty">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Approuvées -->
+    <div id="panel-approuves" class="db-panel">
+      <div class="db-actions"><button class="btn-sm btn-reload" onclick="loadFiltered('approuve')">🔄 Actualiser</button></div>
+      <div class="db-table-wrapper">
+        <table class="db-table">
+          <thead><tr><th>#</th><th>Nom complet</th><th>Email</th><th>Montant</th><th>Durée</th><th>Type</th><th>Note</th><th>Date</th></tr></thead>
+          <tbody id="tbody-approuves"><tr><td colspan="8" class="db-empty">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Refusées -->
+    <div id="panel-refuses" class="db-panel">
+      <div class="db-actions"><button class="btn-sm btn-reload" onclick="loadFiltered('refuse')">🔄 Actualiser</button></div>
+      <div class="db-table-wrapper">
+        <table class="db-table">
+          <thead><tr><th>#</th><th>Nom complet</th><th>Email</th><th>Montant</th><th>Type</th><th>Note</th><th>Date</th></tr></thead>
+          <tbody id="tbody-refuses"><tr><td colspan="7" class="db-empty">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Historique -->
+    <div id="panel-historique" class="db-panel">
+      <div class="db-actions"><button class="btn-sm btn-reload" onclick="loadHistorique()">🔄 Actualiser</button></div>
+      <div class="db-table-wrapper" style="padding:1.5rem">
+        <div id="historique-list"><div class="db-empty">Chargement…</div></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div id="panel-stats" class="db-panel">
+      <div class="db-actions"><button class="btn-sm btn-reload" onclick="loadStats()">🔄 Actualiser</button></div>
+      <div class="stats-grid" id="stats-cards"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div style="background:#fff;border-radius:16px;padding:1.5rem;box-shadow:var(--shadow)">
+          <h4 style="color:var(--navy);margin-bottom:1rem;font-size:.95rem">Répartition par type</h4>
+          <div id="stat-types"></div>
+        </div>
+        <div style="background:#fff;border-radius:16px;padding:1.5rem;box-shadow:var(--shadow)">
+          <h4 style="color:var(--navy);margin-bottom:1rem;font-size:.95rem">Activité par mois</h4>
+          <div id="stat-mois"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><a href="#" class="nav-logo">Flexi<span>Prêt</span></a><p>FlexiPrêt est un organisme de crédit à la consommation agréé. TAEG variables selon profil. Crédit soumis à acceptation.</p></div>
+    <div class="footer-col"><h5>Produits</h5><ul><li><a href="#">Prêt personnel</a></li><li><a href="#">Crédit auto</a></li><li><a href="#">Prêt travaux</a></li><li><a href="#">Prêt confort</a></li></ul></div>
+    <div class="footer-col"><h5>Entreprise</h5><ul><li><a href="#">À propos</a></li><li><a href="#">Nos engagements</a></li><li><a href="#">Recrutement</a></li><li><a href="#">Presse</a></li></ul></div>
+    <div class="footer-col"><h5>Légal</h5><ul><li><a href="#">Mentions légales</a></li><li><a href="#">RGPD</a></li><li><a href="#">CGU</a></li><li><a href="#">Cookies</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 FlexiPrêt. Tous droits réservés.</span><span>🔒 Établissement agréé ACPR · N° 123456789</span></div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toast-msg">Action réussie</span></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3>Dossier #<span id="modal-id"></span></h3>
+    <p class="sub">Consultez les détails et prenez une décision</p>
+    <div class="modal-detail" id="modal-content"></div>
+    <div class="modal-note">
+      <label>Note / Commentaire</label>
+      <textarea id="modal-note" rows="2" placeholder="Ajouter une note sur cette décision…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-approve" onclick="updateStatut('approuve')">✅ Approuver</button>
+      <button class="btn-reject" onclick="updateStatut('refuse')">❌ Refuser</button>
+      <button class="btn-delete" onclick="deleteDemande()">🗑</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== CONFIG =====================
+// Auto-détecte : même origine en prod, localhost en dev
+  const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000/api'
+    : window.location.origin + '/api';
+let currentModalId = null;
+let apiOnline = false;
+
+// ===================== API CHECK =====================
+async function checkAPI() {
+  try {
+    const r = await fetch(`${API}/stats`, { signal: AbortSignal.timeout(3000) });
+    apiOnline = r.ok;
+  } catch { apiOnline = false; }
+  const ind = document.getElementById('api-indicator');
+  const banner = document.getElementById('offline-banner');
+  if (apiOnline) {
+    ind.className = 'api-status online'; ind.textContent = 'API en ligne';
+    banner.classList.remove('show');
+    loadAll();
+  } else {
+    ind.className = 'api-status offline'; ind.textContent = 'API hors ligne';
+    banner.classList.add('show');
+    setAllTabsOffline();
+  }
+}
+
+function setAllTabsOffline() {
+  document.getElementById('tbody-demandes').innerHTML = '<tr><td colspan="10" class="db-empty">⚠️ API hors ligne. Lancez <code>python3 app.py</code> pour démarrer le serveur.</td></tr>';
+  document.getElementById('tbody-approuves').innerHTML = '<tr><td colspan="8" class="db-empty">API hors ligne</td></tr>';
+  document.getElementById('tbody-refuses').innerHTML = '<tr><td colspan="7" class="db-empty">API hors ligne</td></tr>';
+}
+
+// ===================== SIMULATOR =====================
+function updateSim() {
+  const m = parseFloat(document.getElementById('slider-montant').value);
+  const d = parseInt(document.getElementById('slider-duree').value);
+  const t = parseFloat(document.getElementById('slider-taux').value);
+  document.getElementById('val-montant').textContent = m.toLocaleString('fr-FR') + ' €';
+  document.getElementById('val-duree').textContent = d + ' mois';
+  document.getElementById('val-taux').textContent = t.toFixed(1).replace('.',',') + '%';
+  const r = (t / 100) / 12;
+  const men = r === 0 ? m / d : m * r / (1 - Math.pow(1 + r, -d));
+  const total = men * d;
+  document.getElementById('sim-mensualite').textContent = fmt(men) + ' €';
+  document.getElementById('sim-cout').textContent = fmt(total - m) + ' €';
+  document.getElementById('sim-total').textContent = fmt(total) + ' €';
+}
+updateSim();
+function fmt(n) { return n.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function scrollToDemande() { document.getElementById('demande').scrollIntoView({behavior:'smooth'}); }
+
+// ===================== SUBMIT FORM =====================
+async function submitDemande() {
+  if (!apiOnline) { showToast('⚠️ API hors ligne. Lancez python3 app.py', true); return; }
+  const prenom = document.getElementById('f-prenom').value.trim();
+  const nom = document.getElementById('f-nom').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const montant = document.getElementById('f-montant').value;
+  const duree = document.getElementById('f-duree').value;
+  const type_pret = document.getElementById('f-type').value;
+  if (!prenom||!nom||!email||!montant||!duree||!type_pret) { showToast('⚠️ Remplissez tous les champs requis (*)', true); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('⚠️ Email invalide', true); return; }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Envoi en cours…';
+
+  try {
+    const res = await fetch(`${API}/demandes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prenom, nom, email,
+        telephone: document.getElementById('f-tel').value.trim(),
+        montant: parseFloat(montant),
+        duree: parseInt(duree),
+        type_pret,
+        revenus: document.getElementById('f-revenus').value || null,
+        situation: document.getElementById('f-situation').value
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur serveur');
+    showToast('✅ Demande #' + data.id + ' enregistrée en base de données !');
+    ['f-prenom','f-nom','f-email','f-tel','f-montant','f-revenus'].forEach(id => document.getElementById(id).value='');
+    ['f-duree','f-type','f-situation'].forEach(id => document.getElementById(id).selectedIndex=0);
+    loadAll();
+    setTimeout(() => document.getElementById('base-de-donnees').scrollIntoView({behavior:'smooth'}), 400);
+  } catch(e) {
+    showToast('❌ Erreur : ' + e.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Envoyer ma demande →';
+  }
+}
+
+// ===================== LOAD DATA =====================
+async function loadAll() {
+  await Promise.all([loadDemandes(), loadFiltered('approuve'), loadFiltered('refuse'), loadStats(), loadHistorique()]);
+}
+
+async function loadDemandes() {
+  try {
+    const res = await fetch(`${API}/demandes`);
+    const data = await res.json();
+    document.getElementById('count-demandes').textContent = data.length;
+    document.getElementById('hero-count').textContent = data.length;
+    const tbody = document.getElementById('tbody-demandes');
+    if (!data.length) { tbody.innerHTML = '<tr><td colspan="10" class="db-empty">Aucune demande enregistrée. Soumettez le formulaire ci-dessus.</td></tr>'; return; }
+    tbody.innerHTML = data.map((d,i) => `
+      <tr>
+        <td><strong>#${d.id}</strong></td>
+        <td>${d.prenom} ${d.nom}</td>
+        <td style="font-size:.8rem">${d.email}</td>
+        <td><strong>${(+d.montant).toLocaleString('fr-FR')} €</strong></td>
+        <td>${d.duree} mois</td>
+        <td style="font-size:.82rem">${d.type_pret}</td>
+        <td>${d.revenus ? (+d.revenus).toLocaleString('fr-FR')+' €' : '—'}</td>
+        <td><span class="status-badge status-${d.statut}">${statusLabel(d.statut)}</span></td>
+        <td style="font-size:.78rem;white-space:nowrap">${d.created_at ? d.created_at.split(' ')[0] : '—'}</td>
+        <td><button class="btn-sm btn-reload" onclick="openModal(${d.id})">Voir</button></td>
+      </tr>`).join('');
+  } catch(e) { document.getElementById('tbody-demandes').innerHTML = '<tr><td colspan="10" class="db-empty">Erreur de chargement</td></tr>'; }
+}
+
+async function loadFiltered(statut) {
+  try {
+    const res = await fetch(`${API}/demandes?statut=${statut}`);
+    const data = await res.json();
+    if (statut === 'approuve') {
+      document.getElementById('count-approuves').textContent = data.length;
+      const tbody = document.getElementById('tbody-approuves');
+      if (!data.length) { tbody.innerHTML = '<tr><td colspan="8" class="db-empty">Aucune demande approuvée.</td></tr>'; return; }
+      tbody.innerHTML = data.map(d=>`<tr><td>#${d.id}</td><td>${d.prenom} ${d.nom}</td><td style="font-size:.8rem">${d.email}</td><td><strong>${(+d.montant).toLocaleString('fr-FR')} €</strong></td><td>${d.duree} mois</td><td style="font-size:.82rem">${d.type_pret}</td><td style="font-size:.8rem">${d.note||'—'}</td><td style="font-size:.78rem">${d.updated_at?d.updated_at.split(' ')[0]:'—'}</td></tr>`).join('');
+    } else {
+      document.getElementById('count-refuses').textContent = data.length;
+      const tbody = document.getElementById('tbody-refuses');
+      if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" class="db-empty">Aucune demande refusée.</td></tr>'; return; }
+      tbody.innerHTML = data.map(d=>`<tr><td>#${d.id}</td><td>${d.prenom} ${d.nom}</td><td style="font-size:.8rem">${d.email}</td><td>${(+d.montant).toLocaleString('fr-FR')} €</td><td style="font-size:.82rem">${d.type_pret}</td><td style="font-size:.8rem">${d.note||'—'}</td><td style="font-size:.78rem">${d.updated_at?d.updated_at.split(' ')[0]:'—'}</td></tr>`).join('');
+    }
+  } catch {}
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch(`${API}/stats`);
+    const s = await res.json();
+    document.getElementById('stats-cards').innerHTML = `
+      <div class="stat-card"><div class="label">Total demandes</div><div class="value">${s.total}</div></div>
+      <div class="stat-card"><div class="label">Approuvées</div><div class="value mint">${s.approuves}</div></div>
+      <div class="stat-card"><div class="label">En cours</div><div class="value blue">${s.en_cours}</div></div>
+      <div class="stat-card"><div class="label">Taux d'approbation</div><div class="value mint">${s.taux_approbation}%</div></div>
+      <div class="stat-card"><div class="label">Montant moyen</div><div class="value blue" style="font-size:1.4rem">${s.montant_moyen ? (+s.montant_moyen).toLocaleString('fr-FR')+'€' : '—'}</div></div>
+      <div class="stat-card"><div class="label">Total demandé</div><div class="value" style="font-size:1.3rem">${s.montant_total ? (+s.montant_total).toLocaleString('fr-FR')+'€' : '—'}</div></div>
+    `;
+    const total = s.par_type.reduce((acc,t)=>acc+t.n,0)||1;
+    document.getElementById('stat-types').innerHTML = s.par_type.length ? s.par_type.map(t=>`
+      <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem">
+        <span style="min-width:130px;font-size:.82rem;color:var(--text)">${t.type_pret}</span>
+        <div style="flex:1;background:var(--gray);border-radius:50px;height:8px;overflow:hidden"><div style="height:100%;background:var(--blue);border-radius:50px;width:${Math.round(t.n/total*100)}%"></div></div>
+        <span style="font-size:.82rem;font-weight:700;color:var(--navy)">${t.n}</span>
+      </div>`).join('') : '<div class="db-empty" style="padding:1rem">Aucune donnée</div>';
+    document.getElementById('stat-mois').innerHTML = s.par_mois.length ? s.par_mois.map(m=>`
+      <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--gray);font-size:.85rem">
+        <span style="color:var(--text)">${m.mois}</span>
+        <span style="font-weight:700;color:var(--navy)">${m.n} demande${m.n>1?'s':''}</span>
+        <span style="color:var(--blue)">${(+m.total).toLocaleString('fr-FR')} €</span>
+      </div>`).join('') : '<div class="db-empty" style="padding:1rem">Aucune donnée</div>';
+  } catch {}
+}
+
+async function loadHistorique() {
+  try {
+    const res = await fetch(`${API}/historique`);
+    const data = await res.json();
+    const el = document.getElementById('historique-list');
+    if (!data.length) { el.innerHTML = '<div class="db-empty">Aucune activité enregistrée.</div>'; return; }
+    el.innerHTML = data.map(h=>`
+      <div class="hist-item">
+        <span class="hist-date">${h.created_at}</span>
+        <span class="hist-text"><strong>#${h.demande_id} ${h.prenom||''} ${h.nom||''}</strong> — ${h.action}${h.details?' : '+h.details:''}</span>
+      </div>`).join('');
+  } catch {}
+}
+
+// ===================== MODAL =====================
+async function openModal(id) {
+  try {
+    const res = await fetch(`${API}/demandes/${id}`);
+    const d = await res.json();
+    currentModalId = id;
+    document.getElementById('modal-id').textContent = id;
+    document.getElementById('modal-note').value = d.note || '';
+    document.getElementById('modal-content').innerHTML = `
+      <div class="modal-field"><div class="key">Nom</div><div class="val">${d.prenom} ${d.nom}</div></div>
+      <div class="modal-field"><div class="key">Email</div><div class="val">${d.email}</div></div>
+      <div class="modal-field"><div class="key">Montant</div><div class="val">${(+d.montant).toLocaleString('fr-FR')} €</div></div>
+      <div class="modal-field"><div class="key">Durée</div><div class="val">${d.duree} mois</div></div>
+      <div class="modal-field"><div class="key">Type</div><div class="val">${d.type_pret}</div></div>
+      <div class="modal-field"><div class="key">Revenus</div><div class="val">${d.revenus ? (+d.revenus).toLocaleString('fr-FR')+' €' : '—'}</div></div>
+      <div class="modal-field"><div class="key">Situation</div><div class="val">${d.situation||'—'}</div></div>
+      <div class="modal-field"><div class="key">Statut actuel</div><div class="val"><span class="status-badge status-${d.statut}">${statusLabel(d.statut)}</span></div></div>
+    `;
+    document.getElementById('modal').classList.add('open');
+  } catch(e) { showToast('❌ Erreur de chargement', true); }
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); currentModalId = null; }
+
+async function updateStatut(statut) {
+  if (!currentModalId) return;
+  const note = document.getElementById('modal-note').value;
+  try {
+    const res = await fetch(`${API}/demandes/${currentModalId}/statut`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ statut, note })
+    });
+    if (!res.ok) throw new Error();
+    showToast(statut === 'approuve' ? '✅ Demande approuvée !' : '❌ Demande refusée.');
+    closeModal(); loadAll();
+  } catch { showToast('❌ Erreur lors de la mise à jour', true); }
+}
+
+async function deleteDemande() {
+  if (!currentModalId) return;
+  if (!confirm(`Supprimer définitivement la demande #${currentModalId} ?`)) return;
+  try {
+    const res = await fetch(`${API}/demandes/${currentModalId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error();
+    showToast('🗑 Demande supprimée de la base de données');
+    closeModal(); loadAll();
+  } catch { showToast('❌ Erreur lors de la suppression', true); }
+}
+
+// ===================== TABS =====================
+function showTab(name) {
+  ['demandes','approuves','refuses','historique','stats'].forEach(t => {
+    document.getElementById('panel-'+t).classList.toggle('active', t===name);
+  });
+  document.querySelectorAll('.db-tab').forEach((btn,i) => {
+    btn.classList.toggle('active', ['demandes','approuves','refuses','historique','stats'][i]===name);
+  });
+  if (name==='historique') loadHistorique();
+  if (name==='stats') loadStats();
+}
+
+// ===================== UTILS =====================
+function exportCSV() {
+  if (!apiOnline) { showToast('⚠️ API hors ligne', true); return; }
+  window.open(`${API}/export/csv`, '_blank');
+}
+function statusLabel(s) {
+  return {'en-cours':'En cours','approuve':'Approuvé','refuse':'Refusé','rembourse':'Remboursé'}[s]||s;
+}
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.style.background = isError ? '#c0392b' : 'var(--navy)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+// ===================== INIT =====================
+checkAPI();
+setInterval(checkAPI, 30000); // re-check every 30s
+</script>
+</body>
+</html>
